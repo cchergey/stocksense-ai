@@ -7,6 +7,8 @@ from dotenv import load_dotenv
 from prophet import Prophet
 
 load_dotenv()
+if "ANTHROPIC_API_KEY" in st.secrets:
+    os.environ["ANTHROPIC_API_KEY"] = st.secrets["ANTHROPIC_API_KEY"]
 
 client = anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
 
@@ -151,7 +153,6 @@ Keep your answer concise and clear. No asterisks or markdown symbols."""
             predicted_price = forecast["yhat"].iloc[-1]
             change = ((predicted_price - last_price) / last_price) * 100
 
-        # Metrics row
         m1, m2, m3 = st.columns(3)
         with m1:
             st.metric("Current Price", f"${last_price:.2f}")
@@ -160,7 +161,6 @@ Keep your answer concise and clear. No asterisks or markdown symbols."""
         with m3:
             st.metric("Projected Change", f"{change:.1f}%", delta=f"{change:.1f}%")
 
-        # Chart
         fig = go.Figure()
         fig.add_trace(go.Scatter(x=prophet_df["ds"], y=prophet_df["y"], name="Historical", line=dict(color="#1a3c6e")))
         fig.add_trace(go.Scatter(x=forecast["ds"], y=forecast["yhat"], name="Forecast", line=dict(color="#2ecc71")))
